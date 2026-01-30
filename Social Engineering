@@ -1,0 +1,5 @@
+## 📋 Quick Start
+
+### 1. Encode Payload (Attacker Machine)
+```bash
+python image_encoder.py payload.png original_image.jpg
