@@ -1,0 +1,6 @@
+pillow
+cryptography
+pynput
+pyautogui
+psutil
+requests
